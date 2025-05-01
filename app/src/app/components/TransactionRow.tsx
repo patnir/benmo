@@ -26,11 +26,17 @@ export function TransactionRow({
   date,
   endTime,
   onAction,
-  onTimerComplete,
 }: TransactionRowProps) {
   // Determine the icon and color based on transaction type
   const Icon = type === "send" ? ArrowUpIcon : ArrowDownIcon;
   const iconColor = type === "send" ? "text-blue-400" : "text-green-400";
+
+  if (endTime && endTime.getTime() < Date.now()) {
+    endTime = undefined;
+    if (type === 'send') {
+      status = "completed";
+    }
+  }
 
   return (
     <div className="py-4 px-4 border-b border-gray-700 last:border-b-0 bg-gray-700 rounded-lg mb-3">
@@ -49,7 +55,7 @@ export function TransactionRow({
                 <>
                   <span>•</span>
                   <span>
-                    <Timer endTime={endTime} onComplete={onTimerComplete} />{" "}
+                    <Timer endTime={endTime} />{" "}
                     remaining
                   </span>
                 </>

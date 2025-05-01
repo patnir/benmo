@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TransactionRow } from "./TransactionRow";
 import { SendDialog } from "./SendDialog";
-import { useAccount, useBalance, useWriteContract } from "wagmi";
+import { useAccount, useBalance, useConfig, useReadContract, useWriteContract } from "wagmi";
 import { abi, address } from "./contract";
 import { SendButton } from "./SendButton";
+import { readContract } from "wagmi/actions";
+import { useQuery } from "wagmi/query";
 
 export default function AccountTransactions() {
   const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
@@ -45,17 +47,17 @@ export default function AccountTransactions() {
 
   const handleSend = async (
     amount: string,
-    address: string,
+    toAddress: string,
     delaySec: number
   ) => {
     // TODO: Implement actual send functionality
-    console.log("Sending", amount, "ETH to", address, "with delay", delaySec);
+    console.log("Sending", amount, "ETH to", toAddress, "with delay", delaySec);
 
     await sendTransaction({
       address: address as `0x${string}`,
       value: BigInt(Number(amount) * 10 ** 18),
       functionName: "deposit",
-      args: [address as `0x${string}`, BigInt(delaySec)],
+      args: [toAddress as `0x${string}`, BigInt(delaySec)],
       abi,
     });
 
@@ -72,14 +74,41 @@ export default function AccountTransactions() {
     address: account?.address,
     // address:  as `0x${string}`,
   });
-  // const latestTransactions = useReadContract({
-  //   address: address,
-  //   abi: abi,
-  //   functionName: 'senderEscrows',
-  //   args: [account?.address],
-  // });
 
-  console.log(data, error, isLoading, isLoadingError ); 
+  const config = useConfig();
+
+  const getTransactions = async () => {
+    const receiverEscrows = await readContract(config, {
+      address: address,
+      abi: abi,
+      functionName: 'getReceiverEscrows',
+      account: account?.address as `0x${string}`,
+    });
+
+    const senderEscrows = await readContract(config, {
+      address: address,
+      abi: abi,
+      functionName: 'getSenderEscrows',
+      account: account?.address as `0x${string}`,
+    });
+    
+    return [...receiverEscrows.map((escrow) => ({...escrow, type: "receive"})), ...senderEscrows.map((escrow) => ({...escrow, type: "send"}))];
+  }
+
+  type Transaction = {
+    id: bigint;
+    sender: `0x${string}`;
+    receiver: `0x${string}`;
+    amount: bigint;
+    status: number;
+    canWithdrawAt: bigint;
+    type: "receive" | "send";
+}
+
+  const { data: transactions } = useQuery({
+    queryKey: ['transactions'],
+    queryFn: getTransactions,
+  });
 
   return (
     <div className="text-gray-100">
@@ -88,40 +117,16 @@ export default function AccountTransactions() {
       </div>
 
       <div>
-        {/* Pending receive transaction */}
-        <TransactionRow
-          type="receive"
-          status="pending"
-          amount="0.5 ETH"
-          endTime={thirtyMinutesFromNow}
-          date="2024-03-20 14:30"
-        />
-
-        {/* Completed receive transaction */}
-        <TransactionRow
-          type="receive"
-          status="completed"
-          amount="1.2 ETH"
-          date="2024-03-19 09:15"
-        />
-
-        {/* Pending send transaction */}
-        <TransactionRow
-          type="send"
-          status="pending"
-          amount="0.3 ETH"
-          endTime={thirtyMinutesFromNow}
-          onAction={() => console.log("Cancel transaction")}
-          date="2024-03-20 15:45"
-        />
-
-        {/* Completed send transaction */}
-        <TransactionRow
-          type="send"
-          status="completed"
-          amount="0.8 ETH"
-          date="2024-03-18 16:20"
-        />
+        {(transactions as Transaction[])?.map((transaction) => (
+          <TransactionRow
+            key={transaction.id}
+            type={transaction.type}
+            status="pending"
+            amount={`${(Number(transaction.amount) / 1e18).toFixed(6)} ETH`}
+            date={"May 1, 2025"}
+            endTime={new Date(Number(transaction.canWithdrawAt) * 1000)}
+            />
+        ))}
         <SendDialog
           isOpen={isSendDialogOpen}
           onClose={() => setIsSendDialogOpen(false)}
