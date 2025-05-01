@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 contract Escrow {
     struct EscrowData {
+        uint256 id;
         address sender;
         address receiver;
         uint256 amount;
@@ -45,7 +46,7 @@ contract Escrow {
         _;
     }
 
-    function deposit(address receiver, uint256 canWithdrawAfter) external payable {
+    function deposit(address receiver, uint256 canWithdrawAfter) external payable returns (EscrowData memory) {
         require(msg.value > MIN_GAS_VALUE, "Amount must be greater than 0.1 gwei");
         require(receiver != address(0), "Invalid receiver address");
         require(canWithdrawAfter >= 60, "Can withdraw after must be greater than 1 minute");
@@ -57,6 +58,7 @@ contract Escrow {
         uint256 escrowId = escrowCount++;
 
         escrows[escrowId] = EscrowData({
+            id: escrowId,
             sender: msg.sender,
             receiver: receiver,
             amount: receiverAmount,
@@ -66,9 +68,13 @@ contract Escrow {
 
         senderEscrows[msg.sender].push(escrowId);
         receiverEscrows[receiver].push(escrowId);
+        senderEscrowLength[msg.sender]++;
+        receiverEscrowLength[receiver]++;
 
         // transfer the receiverAmount to the receiver
         payable(receiver).transfer(MIN_GAS_VALUE);
+
+        return escrows[escrowId];
     }
 
     // the deposit wallet should be able to cancel the escrow before the receiver withdraws
@@ -86,10 +92,28 @@ contract Escrow {
     function getEscrowDetails(uint256 escrowId)
         external
         view
-        returns (address sender, address receiver, uint256 amount, Status status, uint256 canWithdrawAt)
+        returns (uint256 id, address sender, address receiver, uint256 amount, Status status, uint256 canWithdrawAt)
     {
         require(escrowId < escrowCount, "Escrow does not exist");
         EscrowData memory escrow = escrows[escrowId];
-        return (escrow.sender, escrow.receiver, escrow.amount, escrow.status, escrow.canWithdrawAt);
+        return (escrow.id, escrow.sender, escrow.receiver, escrow.amount, escrow.status, escrow.canWithdrawAt);
+    }
+
+    function getSenderEscrows() external view returns (EscrowData[] memory) {
+        uint256[] memory escrowIds = senderEscrows[msg.sender];
+        EscrowData[] memory result = new EscrowData[](escrowIds.length);
+        for (uint256 i = 0; i < escrowIds.length; i++) {
+            result[i] = escrows[escrowIds[i]];
+        }
+        return result;
+    }
+
+    function getReceiverEscrows() external view returns (EscrowData[] memory) {
+        uint256[] memory escrowIds = receiverEscrows[msg.sender];
+        EscrowData[] memory result = new EscrowData[](escrowIds.length);
+        for (uint256 i = 0; i < escrowIds.length; i++) {
+            result[i] = escrows[escrowIds[i]];
+        }
+        return result;
     }
 }
