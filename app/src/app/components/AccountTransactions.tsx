@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { TransactionRow } from './TransactionRow';
 import { SendDialog } from './SendDialog';
-import { HowItWorks } from './HowItWorks';
 import { ArrowUpIcon } from '@heroicons/react/24/solid';
+import { useBalance } from 'wagmi';
 
 export default function AccountTransactions() {
   const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
@@ -18,13 +18,15 @@ export default function AccountTransactions() {
   const now = new Date();
   const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
 
+  const accountBalance = useBalance();
+
   return (
 
     <div>
       <div className="mb-6">
         <button
           onClick={() => setIsSendDialogOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600! text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           <ArrowUpIcon className="w-5 h-5" />
           Send ETH
@@ -70,7 +72,7 @@ export default function AccountTransactions() {
         isOpen={isSendDialogOpen}
         onClose={() => setIsSendDialogOpen(false)}
         onSend={handleSend}
-        maxAmount="10.0"
+        maxAmount={accountBalance.data?.value.toString()}
       />
       </div>
 </div>
