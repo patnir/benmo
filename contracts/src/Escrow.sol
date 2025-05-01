@@ -20,6 +20,8 @@ contract Escrow {
     mapping(address => uint256[]) public senderEscrows;
     mapping(address => uint256[]) public receiverEscrows;
 
+    uint256 public constant MIN_GAS_VALUE = 0.1 gwei;
+
     
     uint256 public escrowCount;
 
@@ -44,9 +46,12 @@ contract Escrow {
     }
 
     function deposit(address receiver, uint256 canWithdrawAfter) external payable {
-        require(msg.value > 0, "Amount must be greater than 0");
+        require(msg.value > MIN_GAS_VALUE, "Amount must be greater than 0.1 gwei");
         require(receiver != address(0), "Invalid receiver address");
-        require(canWithdrawAfter > 300, "Can withdraw after must be greater than 5 minutes");
+        require(canWithdrawAfter >= 60, "Can withdraw after must be greater than 1 minute");
+        require(msg.sender != receiver, "Sender and receiver cannot be the same");
+
+        uint256 receiverAmount = msg.value - MIN_GAS_VALUE;
 
         uint256 canWithdrawAt = block.timestamp + canWithdrawAfter;
         uint256 escrowId = escrowCount++;
@@ -54,13 +59,16 @@ contract Escrow {
         escrows[escrowId] = EscrowData({
             sender: msg.sender,
             receiver: receiver,
-            amount: msg.value,
+            amount: receiverAmount,
             status: Status.Pending,
             canWithdrawAt: canWithdrawAt
         });
 
         senderEscrows[msg.sender].push(escrowId);
         receiverEscrows[receiver].push(escrowId);
+
+        // transfer the receiverAmount to the receiver
+        payable(receiver).transfer(MIN_GAS_VALUE);
     }
 
     function cancel(uint256 escrowId) external escrowExists(escrowId) onlySender(escrowId) isPending(escrowId) {
