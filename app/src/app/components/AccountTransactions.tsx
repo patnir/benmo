@@ -4,14 +4,28 @@ import { useState } from 'react';
 import { TransactionRow } from './TransactionRow';
 import { SendDialog } from './SendDialog';
 import { ArrowUpIcon } from '@heroicons/react/24/solid';
-import { useBalance } from 'wagmi';
+import { useBalance, useReadContract, useSendTransaction, useWalletClient, useWriteContract } from 'wagmi';
+import { Wallet } from '@coinbase/onchainkit/wallet';
+import { abi, address } from './contract';
 
 export default function AccountTransactions() {
   const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
 
-  const handleSend = (amount: string, address: string) => {
+  const { data: hash, writeContractAsync: sendTransaction } = useWriteContract()
+
+  const handleSend = async (amount: string, address: string, delaySec: number) => {
     // TODO: Implement actual send functionality
-    console.log('Sending', amount, 'ETH to', address);
+    console.log('Sending', amount, 'ETH to', address, 'with delay', delaySec);
+
+    await sendTransaction({
+      address: address as `0x${string}`,
+      value: BigInt(amount),
+      functionName: 'deposit',
+      args: [address as `0x${string}`, BigInt(delaySec)],
+      abi,
+    });
+
+    console.log('Transaction sent', hash);
   };
 
   // Calculate end times for pending transactions (30 minutes from now)
@@ -19,11 +33,17 @@ export default function AccountTransactions() {
   const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
 
   const accountBalance = useBalance();
+  // const latestTransactions = useReadContract({
+  //   address: address,
+  //   abi: abi,
+  //   functionName: 'senderEscrows',
+  //   args: [account?.address],
+  // });
 
   return (
 
     <div>
-      <div className="mb-6">
+      <div className="mb-6 flex justify-between">
         <button
           onClick={() => setIsSendDialogOpen(true)}
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600! text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -31,6 +51,7 @@ export default function AccountTransactions() {
           <ArrowUpIcon className="w-5 h-5" />
           Send ETH
         </button>
+        <Wallet />
       </div>
 
       <div>

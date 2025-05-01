@@ -12,6 +12,8 @@ interface FormFieldProps {
   inputMode?: 'decimal' | 'text' | 'numeric';
   suffix?: ReactNode;
   className?: string;
+  helpText?: string;
+  disabled?: boolean;
 }
 
 export function FormField({
@@ -26,6 +28,8 @@ export function FormField({
   inputMode,
   suffix,
   className = '',
+  helpText,
+  disabled = false,
 }: FormFieldProps) {
   return (
     <div className={className}>
@@ -45,6 +49,7 @@ export function FormField({
           placeholder={placeholder}
           required={required}
           inputMode={inputMode}
+          disabled={disabled}
           className={`
             block w-full rounded-xl px-4 py-3
             text-gray-900 dark:text-white
@@ -58,6 +63,7 @@ export function FormField({
                 : 'border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500'
             }
             ${suffix ? 'pr-12' : ''}
+            ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         />
         {suffix && (
@@ -82,6 +88,11 @@ export function FormField({
             />
           </svg>
           {error}
+        </p>
+      )}
+      {helpText && !error && (
+        <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+          {helpText}
         </p>
       )}
     </div>

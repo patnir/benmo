@@ -6,7 +6,7 @@ import { FormField } from './FormField';
 interface SendDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSend: (amount: string, address: string) => void;
+  onSend: (amount: string, address: string, delaySec: number) => Promise<void>;
   maxAmount?: string; // Optional max amount in ETH
 }
 
@@ -26,19 +26,23 @@ const formatEthAmount = (amount: string): string => {
 export function SendDialog({ isOpen, onClose, onSend, maxAmount = '0' }: SendDialogProps) {
   const [amount, setAmount] = useState('');
   const [address, setAddress] = useState('');
-  const [errors, setErrors] = useState<{ amount?: string; address?: string }>({});
+  const [minutes, setMinutes] = useState('30'); // Default to 30 minutes
+  const [errors, setErrors] = useState<{ amount?: string; address?: string; minutes?: string; send?: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   // Reset form when dialog opens/closes
   useEffect(() => {
     if (!isOpen) {
       setAmount('');
       setAddress('');
+      setMinutes('30');
       setErrors({});
+      setIsLoading(false);
     }
   }, [isOpen]);
 
   const validateForm = (): boolean => {
-    const newErrors: { amount?: string; address?: string } = {};
+    const newErrors: { amount?: string; address?: string; minutes?: string } = {};
 
     // Validate amount
     const numAmount = parseFloat(amount);
@@ -55,15 +59,36 @@ export function SendDialog({ isOpen, onClose, onSend, maxAmount = '0' }: SendDia
       newErrors.address = 'Please enter a valid Ethereum address';
     }
 
+    // Validate minutes
+    const numMinutes = parseInt(minutes);
+    if (isNaN(numMinutes) || numMinutes <= 0) {
+      newErrors.minutes = 'Please enter a valid delay time greater than 0';
+    } else if (numMinutes > 1440) { // 24 hours in minutes
+      newErrors.minutes = 'Delay time cannot exceed 24 hours';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      onSend(amount, address);
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    setErrors({ ...errors, send: undefined });
+
+    try {
+      const delaySec = parseInt(minutes) * 60; // Convert minutes to seconds
+      await onSend(amount, address, delaySec);
       onClose();
+    } catch (error) {
+      setErrors({
+        ...errors,
+        send: error instanceof Error ? error.message : 'Failed to send transaction',
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -80,6 +105,15 @@ export function SendDialog({ isOpen, onClose, onSend, maxAmount = '0' }: SendDia
     setAddress(value);
     if (errors.address) {
       setErrors({ ...errors, address: undefined });
+    }
+  };
+
+  const handleMinutesChange = (value: string) => {
+    if (value === '' || /^\d*$/.test(value)) {
+      setMinutes(value);
+      if (errors.minutes) {
+        setErrors({ ...errors, minutes: undefined });
+      }
     }
   };
 
@@ -122,6 +156,7 @@ export function SendDialog({ isOpen, onClose, onSend, maxAmount = '0' }: SendDia
                     type="button"
                     className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
                     onClick={onClose}
+                    disabled={isLoading}
                   >
                     <XMarkIcon className="h-6 w-6" />
                   </button>
@@ -137,6 +172,7 @@ export function SendDialog({ isOpen, onClose, onSend, maxAmount = '0' }: SendDia
                         type="button"
                         onClick={handleMaxAmount}
                         className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                        disabled={isLoading}
                       >
                         Use Max
                       </button>
@@ -152,6 +188,7 @@ export function SendDialog({ isOpen, onClose, onSend, maxAmount = '0' }: SendDia
                       required
                       inputMode="decimal"
                       suffix={<span className="text-gray-500 dark:text-gray-400">ETH</span>}
+                      disabled={isLoading}
                     />
                   </div>
 
@@ -163,15 +200,65 @@ export function SendDialog({ isOpen, onClose, onSend, maxAmount = '0' }: SendDia
                     placeholder="0x..."
                     error={errors.address}
                     required
+                    disabled={isLoading}
                   />
+
+                  <FormField
+                    label="Delay Time"
+                    id="minutes"
+                    type="text"
+                    value={minutes}
+                    onChange={handleMinutesChange}
+                    placeholder="30"
+                    error={errors.minutes}
+                    required
+                    inputMode="numeric"
+                    suffix={<span className="text-gray-500 dark:text-gray-400">minutes</span>}
+                    helpText="Time before the transaction becomes irreversible"
+                    disabled={isLoading}
+                  />
+
+                  {errors.send && (
+                    <div className="rounded-lg bg-red-50 dark:bg-red-900/50 p-4">
+                      <p className="text-sm text-red-600 dark:text-red-400">
+                        {errors.send}
+                      </p>
+                    </div>
+                  )}
 
                   <div className="pt-2">
                     <button
                       type="submit"
-                      className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600! hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      disabled={!amount || !address}
+                      className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600! hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      disabled={!amount || !address || !minutes || isLoading}
                     >
-                      Send ETH
+                      {isLoading ? (
+                        <>
+                          <svg
+                            className="animate-spin h-5 w-5 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                          </svg>
+                          Sending...
+                        </>
+                      ) : (
+                        'Send ETH'
+                      )}
                     </button>
                   </div>
                 </form>
