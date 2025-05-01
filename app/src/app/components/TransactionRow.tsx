@@ -33,7 +33,7 @@ export function TransactionRow({
 
   if (endTime && endTime.getTime() < Date.now()) {
     endTime = undefined;
-    if (type === 'send') {
+    if (type === "send") {
       status = "completed";
     }
   }
@@ -55,8 +55,7 @@ export function TransactionRow({
                 <>
                   <span>•</span>
                   <span>
-                    <Timer endTime={endTime} />{" "}
-                    remaining
+                    <Timer endTime={endTime} /> remaining
                   </span>
                 </>
               )}
@@ -66,26 +65,42 @@ export function TransactionRow({
 
         {status === "pending" && (
           <div className="flex gap-2">
-            <button
-              onClick={() => {
-                // TODO: Implement cancel functionality
-                if (onAction) onAction();
-              }}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2"
-            >
-              <XMarkIcon className="w-4 h-4" />
-              Reject
-            </button>
-            <button
-              onClick={() => {
-                // TODO: Implement confirm functionality
-                if (onAction) onAction();
-              }}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center gap-2"
-            >
-              <CheckIcon className="w-4 h-4" />
-              Confirm
-            </button>
+            {type === "send" && (
+              <>
+                <button
+                  onClick={() => {
+                    // TODO: Implement cancel functionality
+                    if (onAction) onAction();
+                  }}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2"
+                >
+                  <XMarkIcon className="w-4 h-4" />
+                  Reject
+                </button>
+                <button
+                  onClick={() => {
+                    // TODO: Implement confirm functionality
+                    if (onAction) onAction();
+                  }}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center gap-2"
+                >
+                  <CheckIcon className="w-4 h-4" />
+                  Confirm
+                </button>
+              </>
+            )}
+            {type === "receive" && (
+              <button
+                onClick={() => {
+                  // TODO: Implement claim functionality
+                  if (onAction) onAction();
+                }}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center gap-2"
+              >
+                <CheckIcon className="w-4 h-4" />
+                Claim
+              </button>
+            )}
           </div>
         )}
 
