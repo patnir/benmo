@@ -3,16 +3,9 @@
 import { useState } from "react";
 import { TransactionRow } from "./TransactionRow";
 import { SendDialog } from "./SendDialog";
-import { ArrowUpIcon } from "@heroicons/react/24/solid";
-import {
-  useBalance,
-  useReadContract,
-  useSendTransaction,
-  useWalletClient,
-  useWriteContract,
-} from "wagmi";
-import { Wallet } from "@coinbase/onchainkit/wallet";
+import { useBalance, useWriteContract } from "wagmi";
 import { abi, address } from "./contract";
+import { SendButton } from "./SendButton";
 
 export default function AccountTransactions() {
   const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
@@ -20,6 +13,7 @@ export default function AccountTransactions() {
   const { data: hash, writeContractAsync: sendTransaction } =
     useWriteContract();
 
+  // Will be used in future implementation
   const handleCancel = async (escrowId: number) => {
     // TODO: Implement actual send functionality
     console.log("Cancelling escrow", escrowId);
@@ -34,6 +28,7 @@ export default function AccountTransactions() {
     console.log("Transaction sent", hash);
   };
 
+  // Will be used in future implementation
   const handleClaim = async (escrowId: number) => {
     // TODO: Implement actual send functionality
     console.log("Claiming escrow", escrowId);
@@ -80,16 +75,9 @@ export default function AccountTransactions() {
   // });
 
   return (
-    <div>
-      <div className="mb-6 flex justify-between">
-        <button
-          onClick={() => setIsSendDialogOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600! text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <ArrowUpIcon className="w-5 h-5" />
-          Send ETH
-        </button>
-        <Wallet />
+    <div className="text-gray-100">
+      <div className="mb-6">
+        <SendButton onClick={() => setIsSendDialogOpen(true)} />
       </div>
 
       <div>

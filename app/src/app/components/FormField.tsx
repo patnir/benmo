@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
 
 interface FormFieldProps {
   label: string;
@@ -9,7 +9,7 @@ interface FormFieldProps {
   placeholder?: string;
   error?: string;
   required?: boolean;
-  inputMode?: 'decimal' | 'text' | 'numeric';
+  inputMode?: "decimal" | "text" | "numeric";
   suffix?: ReactNode;
   className?: string;
   helpText?: string;
@@ -19,7 +19,7 @@ interface FormFieldProps {
 export function FormField({
   label,
   id,
-  type = 'text',
+  type = "text",
   value,
   onChange,
   placeholder,
@@ -27,7 +27,7 @@ export function FormField({
   required = false,
   inputMode,
   suffix,
-  className = '',
+  className = "",
   helpText,
   disabled = false,
 }: FormFieldProps) {
@@ -35,10 +35,10 @@ export function FormField({
     <div className={className}>
       <label
         htmlFor={id}
-        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+        className="block text-sm font-medium text-gray-100 mb-1.5"
       >
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-red-400 ml-1">*</span>}
       </label>
       <div className="relative rounded-xl shadow-sm">
         <input
@@ -52,18 +52,18 @@ export function FormField({
           disabled={disabled}
           className={`
             block w-full rounded-xl px-4 py-3
-            text-gray-900 dark:text-white
-            placeholder-gray-400 dark:placeholder-gray-500
-            bg-white dark:bg-gray-700
+            text-white
+            placeholder-gray-400
+            bg-gray-700
             border-2 transition-colors duration-200
-            focus:outline-none focus:ring-2 focus:ring-offset-2
+            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800
             ${
               error
-                ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                : 'border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500'
+                ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-600 focus:border-blue-500 focus:ring-blue-500"
             }
-            ${suffix ? 'pr-12' : ''}
-            ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+            ${suffix ? "pr-12" : ""}
+            ${disabled ? "opacity-50 cursor-not-allowed" : ""}
           `}
         />
         {suffix && (
@@ -73,7 +73,7 @@ export function FormField({
         )}
       </div>
       {error && (
-        <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center">
+        <p className="mt-1.5 text-sm text-red-400 flex items-center">
           <svg
             className="w-4 h-4 mr-1"
             fill="none"
@@ -91,10 +91,8 @@ export function FormField({
         </p>
       )}
       {helpText && !error && (
-        <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
-          {helpText}
-        </p>
+        <p className="mt-1.5 text-sm text-gray-300">{helpText}</p>
       )}
     </div>
   );
-} 
+}

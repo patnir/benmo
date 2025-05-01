@@ -2,22 +2,31 @@ import { useAccount } from "wagmi";
 import { HowItWorks } from "./HowItWorks";
 import AccountSetup from "./AccountSetup";
 import AccountTransactions from "./AccountTransactions";
+import { Wallet } from "@coinbase/onchainkit/wallet";
+import { OnchainKitProvider } from "@coinbase/onchainkit";
+import { baseSepolia } from "wagmi/chains";
 
 const App = () => {
   const account = useAccount();
 
   return (
-    <main className="min-h-screen p-4 md:p-8 max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Benmo</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Send transactions without worrying about sending to the wrong address.
-        </p>
-      </div>
-      <HowItWorks />
+    <div className="min-h-screen w-full bg-gray-800">
+      <main className="min-h-screen p-4 md:p-8 max-w-4xl mx-auto text-gray-100">
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <h1 className="text-4xl font-bold mb-2 text-white">Benmo</h1>
+            <Wallet />
+          </div>
+          <p className="text-gray-300">
+            Send transactions without worrying about sending to the wrong
+            address.
+          </p>
+        </div>
+        <HowItWorks />
 
-      {!account.isConnected ? <AccountSetup /> : <AccountTransactions />}
-    </main>
+        {!account.isConnected ? <AccountSetup /> : <AccountTransactions />}
+      </main>
+    </div>
   );
 };
 
