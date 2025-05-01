@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-
 contract Escrow {
     struct EscrowData {
         address sender;
@@ -18,9 +17,11 @@ contract Escrow {
 
     mapping(uint256 => EscrowData) public escrows;
     mapping(address => uint256[]) public senderEscrows;
+    mapping(address => uint256) public senderEscrowLength;
     mapping(address => uint256[]) public receiverEscrows;
+    mapping(address => uint256) public receiverEscrowLength;
 
-    uint256 public constant MIN_GAS_VALUE = 0.1 gwei;
+    uint256 public constant MIN_GAS_VALUE = 100 gwei;
 
     uint256 public escrowCount;
 
@@ -73,6 +74,7 @@ contract Escrow {
     // the deposit wallet should be able to cancel the escrow before the receiver withdraws
     function cancel(uint256 escrowId) external escrowExists(escrowId) onlySender(escrowId) isPending(escrowId) {
         escrows[escrowId].status = Status.Cancelled;
+        // print the escrowId
         // refund the sender the amount
         payable(escrows[escrowId].sender).transfer(escrows[escrowId].amount);
     }
