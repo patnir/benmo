@@ -201,7 +201,7 @@ export function SendDialog({
                   </div>
 
                   <FormField
-                    label="Recipient Address"
+                    label="To"
                     id="address"
                     value={address}
                     onChange={handleAddressChange}
@@ -212,7 +212,7 @@ export function SendDialog({
                   />
 
                   <FormField
-                    label="Delay Time"
+                    label="Delay"
                     id="minutes"
                     type="text"
                     value={minutes}
@@ -222,7 +222,6 @@ export function SendDialog({
                     required
                     inputMode="numeric"
                     suffix={<span className="text-gray-300">minutes</span>}
-                    helpText="Time before the transaction becomes irreversible"
                     disabled={isLoading}
                   />
 
