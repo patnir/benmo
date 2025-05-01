@@ -16,19 +16,24 @@ contract EscrowTest is Test {
 
         address receiverEOA = makeAddr("receiverEOA");
 
-        // print the balance of the contract
-        console.log("Balance of the contract", address(this).balance);
-        console.log("Balance of the receiverEOA", address(receiverEOA).balance);
+        // assert balances before
+        assertEq(address(this).balance, 2 ether);
+        assertEq(address(receiverEOA).balance, 0);
 
         escrow.deposit{value: 0.1 ether}(receiverEOA, 60);
 
-        // assertEq(address(this).balance, 0.1 gwei);
-        // assertEq(escrow.senderEscrows(address(this)).length, 1);
-        // assertEq(escrow.receiverEscrows(address(this)).length, 1);
-        // assertEq(escrow.escrows(0).sender, address(this));
-        // assertEq(escrow.escrows(0).receiver, address(this));
-        // assertEq(escrow.escrows(0).amount, 0.1 gwei);
-        // assertEq(escrow.escrows(0).canWithdrawAt, block.timestamp + 60);
-        // assertEq(escrow.escrows(0).status, Escrow.Status.Pending);
+        assertEq(address(receiverEOA).balance, 0.1 gwei);
+        assertEq(escrow.senderEscrows(address(this), 0), 0);
+        assertEq(escrow.receiverEscrows(receiverEOA, 0), 0);
+        (address sender, address receiver, uint256 amount, Escrow.Status status, uint256 canWithdrawAt) = escrow.escrows(0);
+        assertEq(sender, address(this));
+        assertEq(receiver, receiverEOA);
+        assertEq(amount, 0.1 ether - 0.1 gwei);
+        assertEq(canWithdrawAt, block.timestamp + 60);
+        assertEq(uint(status), uint(Escrow.Status.Pending));
+
+        // assert balances after
+        assertEq(address(this).balance, 2 ether - 0.1 ether);
+        assertEq(address(receiverEOA).balance, 0.1 gwei);
     }
 }
