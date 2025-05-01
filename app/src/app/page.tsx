@@ -7,12 +7,13 @@ import { HowItWorks } from './components/HowItWorks';
 import { ArrowUpIcon } from '@heroicons/react/24/solid';
 import AccountSetup from './components/AccountSetup';
 import AccountTransactions from './components/AccountTransactions';
+import { OnchainKitProvider } from '@coinbase/onchainkit';
+import { baseSepolia } from 'wagmi/chains'; // add baseSepolia for testing 
 
 export default function Home() {
   const isAccountSetup = false;
 
   return (
-
     <main className="min-h-screen p-4 md:p-8 max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Benmo</h1>
@@ -23,7 +24,9 @@ export default function Home() {
 
       <HowItWorks />
 
-      {!isAccountSetup ? <AccountSetup /> : <AccountTransactions />}
+      <OnchainKitProvider chain={baseSepolia}>
+        {!isAccountSetup ? <AccountSetup /> : <AccountTransactions />}
+      </OnchainKitProvider>
     </main>
   )
 }
