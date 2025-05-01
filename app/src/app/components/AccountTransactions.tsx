@@ -53,7 +53,7 @@ export default function AccountTransactions() {
 
     await sendTransaction({
       address: address as `0x${string}`,
-      value: BigInt(amount),
+      value: BigInt(Number(amount) * 10 ** 18),
       functionName: "deposit",
       args: [address as `0x${string}`, BigInt(delaySec)],
       abi,
