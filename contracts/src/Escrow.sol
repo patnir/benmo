@@ -74,10 +74,11 @@ contract Escrow {
     // the deposit wallet should be able to cancel the escrow before the receiver withdraws
     function cancel(uint256 escrowId) external escrowExists(escrowId) onlySender(escrowId) isPending(escrowId) {
         escrows[escrowId].status = Status.Cancelled;
-        payable(msg.sender).transfer(escrows[escrowId].amount / 2);
+        payable(msg.sender).transfer(escrows[escrowId].amount);
     }
 
     function withdraw(uint256 escrowId) external escrowExists(escrowId) onlyReceiver(escrowId) isPending(escrowId) {
+        require(block.timestamp >= escrows[escrowId].canWithdrawAt, "Cannot withdraw yet");
         escrows[escrowId].status = Status.Completed;
         payable(msg.sender).transfer(escrows[escrowId].amount);
     }
