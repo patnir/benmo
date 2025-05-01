@@ -78,9 +78,8 @@ contract Escrow {
     }
 
     function withdraw(uint256 escrowId) external escrowExists(escrowId) onlyReceiver(escrowId) isPending(escrowId) {
-        require(escrows[escrowId].sender == msg.sender, "Only sender can withdraw");
         escrows[escrowId].status = Status.Completed;
-        payable(escrows[escrowId].receiver).transfer(escrows[escrowId].amount);
+        payable(msg.sender).transfer(escrows[escrowId].amount);
     }
 
     function getEscrowDetails(uint256 escrowId)
