@@ -1,7 +1,5 @@
 import { useAccount } from "wagmi";
 import { HowItWorks } from "./HowItWorks";
-import { OnchainKitProvider } from "@coinbase/onchainkit";
-import { baseSepolia } from "wagmi/chains";
 import AccountSetup from "./AccountSetup";
 import AccountTransactions from "./AccountTransactions";
 import Address from "./Address";
@@ -22,9 +20,7 @@ const App = () => {
 
       <HowItWorks />
 
-      <OnchainKitProvider chain={baseSepolia}>
-        {!account.isConnected ? <AccountSetup /> : <AccountTransactions />}
-      </OnchainKitProvider>
+      {!account.isConnected ? <AccountSetup /> : <AccountTransactions />}
     </main>
   );
 };
