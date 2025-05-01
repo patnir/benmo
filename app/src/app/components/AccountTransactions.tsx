@@ -17,7 +17,6 @@ export default function AccountTransactions() {
 
 
   const config = useConfig();
-
   const getTransactions = async () => {
     const receiverEscrows = await readContract(config, {
       address: address,

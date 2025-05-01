@@ -1,12 +1,15 @@
-import { useAccount } from "wagmi";
+import { useAccount, useSwitchChain } from "wagmi";
 import AccountSetup from "./AccountSetup";
 import AccountTransactions from "./AccountTransactions";
 import { Wallet } from "@coinbase/onchainkit/wallet";
-import { OnchainKitProvider } from "@coinbase/onchainkit";
-import { baseSepolia } from "wagmi/chains";
+import { baseSepolia } from 'wagmi/chains'
+
 
 const App = () => {
   const account = useAccount();
+
+  const { chains, error, switchChain } =
+    useSwitchChain()
 
   return (
     <div className="min-h-screen w-full bg-gray-800">
@@ -14,6 +17,9 @@ const App = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <h1 className="text-4xl font-bold mb-2 text-white">Benmo</h1>
+            <button onClick={() => switchChain({
+              chainId: baseSepolia.id,
+            })}>Switch Chain</button>
             <Wallet />
           </div>
           <p className="text-gray-300">
