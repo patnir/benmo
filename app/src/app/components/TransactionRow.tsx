@@ -10,22 +10,27 @@ type TransactionType = "send" | "receive";
 type TransactionStatus = "pending" | "completed";
 
 interface TransactionRowProps {
+  id: bigint;
   type: TransactionType;
   status: TransactionStatus;
   amount: string;
   date: string;
   endTime?: Date;
-  onAction?: () => void;
-  onTimerComplete?: () => void;
+  onCancel?: () => void;
+  onConfirm?: () => void;
+  onWithdraw?: () => void;
 }
 
 export function TransactionRow({
+  id,
   type,
   status,
   amount,
   date,
   endTime,
-  onAction,
+  onCancel,
+  onConfirm,
+  onWithdraw,
 }: TransactionRowProps) {
   // Determine the icon and color based on transaction type
   const Icon = type === "send" ? ArrowUpIcon : ArrowDownIcon;
@@ -70,7 +75,7 @@ export function TransactionRow({
                 <button
                   onClick={() => {
                     // TODO: Implement cancel functionality
-                    if (onAction) onAction();
+                    if (onCancel) onCancel();
                   }}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2"
                 >
@@ -80,7 +85,7 @@ export function TransactionRow({
                 <button
                   onClick={() => {
                     // TODO: Implement confirm functionality
-                    if (onAction) onAction();
+                    if (onConfirm) onConfirm();
                   }}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center gap-2"
                 >
@@ -93,7 +98,7 @@ export function TransactionRow({
               <button
                 onClick={() => {
                   // TODO: Implement claim functionality
-                  if (onAction) onAction();
+                  if (onWithdraw) onWithdraw();
                 }}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center gap-2"
               >
