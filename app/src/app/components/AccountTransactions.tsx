@@ -13,6 +13,36 @@ export default function AccountTransactions() {
 
   const { data: hash, writeContractAsync: sendTransaction } = useWriteContract()
 
+
+  const handleCancel = async (escrowId: number) => {
+    // TODO: Implement actual send functionality
+    console.log('Cancelling escrow', escrowId);
+
+    await sendTransaction({
+      address: address as `0x${string}`,
+      functionName: 'cancel',
+      args: [BigInt(escrowId)],
+      abi,
+    });
+
+    console.log('Transaction sent', hash);
+  };
+
+
+  const handleClaim = async (escrowId: number) => {
+    // TODO: Implement actual send functionality
+    console.log('Claiming escrow', escrowId);
+
+    await sendTransaction({
+      address: address as `0x${string}`,
+      functionName: 'withdraw',
+      args: [BigInt(escrowId)],
+      abi,
+    });
+
+    console.log('Transaction sent', hash);
+  };
+
   const handleSend = async (amount: string, address: string, delaySec: number) => {
     // TODO: Implement actual send functionality
     console.log('Sending', amount, 'ETH to', address, 'with delay', delaySec);
