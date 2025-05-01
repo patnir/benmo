@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { TransactionRow } from "./TransactionRow";
 import { SendDialog } from "./SendDialog";
-import { useBalance, useWriteContract } from "wagmi";
+import { useAccount, useBalance, useWriteContract } from "wagmi";
 import { abi, address } from "./contract";
 import { SendButton } from "./SendButton";
 
@@ -66,13 +66,20 @@ export default function AccountTransactions() {
   const now = new Date();
   const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60 * 1000);
 
-  const accountBalance = useBalance();
+  const account = useAccount();
+
+  const { data, error, isLoading, isLoadingError } = useBalance({
+    address: account?.address,
+    // address:  as `0x${string}`,
+  });
   // const latestTransactions = useReadContract({
   //   address: address,
   //   abi: abi,
   //   functionName: 'senderEscrows',
   //   args: [account?.address],
   // });
+
+  console.log(data, error, isLoading, isLoadingError ); 
 
   return (
     <div className="text-gray-100">
@@ -119,7 +126,7 @@ export default function AccountTransactions() {
           isOpen={isSendDialogOpen}
           onClose={() => setIsSendDialogOpen(false)}
           onSend={handleSend}
-          maxAmount={accountBalance.data?.value.toString()}
+          maxAmount={data?.formatted.toString()}
         />
       </div>
     </div>
