@@ -98,8 +98,8 @@ contract EscrowTest is Test {
         assertEq(address(escrow).balance, 0.1 ether - MIN_GAS_VALUE);
 
         // print escrow 0 
-        (address sender, address receiver, uint256 amount, Escrow.Status status, uint256 canWithdrawAt) =
-            escrow.escrows(0);
+        // (address sender, address receiver, uint256 amount, Escrow.Status status, uint256 canWithdrawAt) =
+        //     escrow.escrows(0);
     
         // cancel
         escrow.cancel(escrowId);
@@ -125,19 +125,16 @@ contract EscrowTest is Test {
         // Deposit 1: sender1 -> receiver1 (0.1 eth)
         vm.prank(sender1);
         Escrow.EscrowData memory escrow1_data = escrow.deposit{value: 0.1 ether}(receiver1, 60);
-        uint256 escrow1_timestamp = block.timestamp; // Capture timestamp *after* deposit potentially
         uint256 escrow1_id = escrow1_data.id;
 
         // Deposit 2: sender1 -> receiver2 (0.2 eth)
         vm.prank(sender1);
         Escrow.EscrowData memory escrow2_data = escrow.deposit{value: 0.2 ether}(receiver2, 120);
-        uint256 escrow2_timestamp = block.timestamp;
         uint256 escrow2_id = escrow2_data.id;
 
         // Deposit 3: sender2 -> receiver1 (0.3 eth)
         vm.prank(sender2);
         Escrow.EscrowData memory escrow3_data = escrow.deposit{value: 0.3 ether}(receiver1, 180);
-        uint256 escrow3_timestamp = block.timestamp;
         uint256 escrow3_id = escrow3_data.id;
 
         // --- Test getSenderEscrows for sender1 ---
