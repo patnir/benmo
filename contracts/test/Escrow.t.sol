@@ -53,15 +53,31 @@ contract EscrowTest is Test {
         assertEq(address(this).balance, 2 ether - 0.1 ether);
         assertEq(address(receiverEOA).balance, MIN_GAS_VALUE);
 
-        // receiver withdraws
+        // advance time
+        vm.warp(block.timestamp + 60);
         
+        // call as receiver 
+        vm.prank(receiverEOA);
         escrow.withdraw(0);
 
         // assert balances after
         assertEq(address(this).balance, 2 ether - 0.1 ether);
-        assertEq(address(receiverEOA).balance, MIN_GAS_VALUE);
+        assertEq(address(receiverEOA).balance, 0.1 ether);
     }
 
+     // Function to receive ETH via a function call
+    function deposit() external payable {}
+
+    // Function to receive ETH without data
+    receive() external payable {}
+
+    // Fallback to receive ETH with data or unknown function call
+    fallback() external payable {}
+
+    function getBalance() external view returns (uint) {
+        return address(this).balance;
+    }
+    
     function testCancel() public {
         vm.deal(address(this), 2 ether);
         address receiverEOA = makeAddr("receiverEOA");
@@ -81,23 +97,16 @@ contract EscrowTest is Test {
         // escrow balance 0.1 gwei
         assertEq(address(escrow).balance, 0.1 ether - MIN_GAS_VALUE);
 
-        // Get details using the new getEscrowDetails signature
-        (uint256 id, address sender, address receiver, uint256 amount, Escrow.Status status, uint256 canWithdrawAt) =
-            escrow.getEscrowDetails(escrowId);
-        console.log("id", id);
-        console.log("sender", sender);
-        console.log("receiver", receiver);
-        console.log("amount", amount);
-        console.log("status", uint256(status));
-        console.log("canWithdrawAt", canWithdrawAt);
-        console.log("escrow balance", address(escrow).balance);
-
+        // print escrow 0 
+        (address sender, address receiver, uint256 amount, Escrow.Status status, uint256 canWithdrawAt) =
+            escrow.escrows(0);
+    
         // cancel
         escrow.cancel(escrowId);
 
         // assert balances after
-        assertEq(address(this).balance, 2 ether);
-        assertEq(address(receiverEOA).balance, 0);
+        assertEq(address(this).balance, 2 ether - MIN_GAS_VALUE);
+        assertEq(address(receiverEOA).balance, MIN_GAS_VALUE);
 
         // // assert balances after - this should expect the full refund of the escrowed amount
         // assertEq(address(this).balance, 2 ether - 0.1 gwei);  // We get back the escrowed amount (0.1 ether - 0.1 gwei)

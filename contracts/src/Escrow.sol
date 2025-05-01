@@ -67,8 +67,9 @@ contract Escrow {
         });
 
         senderEscrows[msg.sender].push(escrowId);
-        receiverEscrows[receiver].push(escrowId);
         senderEscrowLength[msg.sender]++;
+        
+        receiverEscrows[receiver].push(escrowId);
         receiverEscrowLength[receiver]++;
 
         // transfer the receiverAmount to the receiver
