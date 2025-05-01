@@ -1,61 +1,70 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { TransactionRow } from './TransactionRow';
-import { SendDialog } from './SendDialog';
-import { ArrowUpIcon } from '@heroicons/react/24/solid';
-import { useBalance, useReadContract, useSendTransaction, useWalletClient, useWriteContract } from 'wagmi';
-import { Wallet } from '@coinbase/onchainkit/wallet';
-import { abi, address } from './contract';
+import { useState } from "react";
+import { TransactionRow } from "./TransactionRow";
+import { SendDialog } from "./SendDialog";
+import { ArrowUpIcon } from "@heroicons/react/24/solid";
+import {
+  useBalance,
+  useReadContract,
+  useSendTransaction,
+  useWalletClient,
+  useWriteContract,
+} from "wagmi";
+import { Wallet } from "@coinbase/onchainkit/wallet";
+import { abi, address } from "./contract";
 
 export default function AccountTransactions() {
   const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
 
-  const { data: hash, writeContractAsync: sendTransaction } = useWriteContract()
-
+  const { data: hash, writeContractAsync: sendTransaction } =
+    useWriteContract();
 
   const handleCancel = async (escrowId: number) => {
     // TODO: Implement actual send functionality
-    console.log('Cancelling escrow', escrowId);
+    console.log("Cancelling escrow", escrowId);
 
     await sendTransaction({
       address: address as `0x${string}`,
-      functionName: 'cancel',
+      functionName: "cancel",
       args: [BigInt(escrowId)],
       abi,
     });
 
-    console.log('Transaction sent', hash);
+    console.log("Transaction sent", hash);
   };
-
 
   const handleClaim = async (escrowId: number) => {
     // TODO: Implement actual send functionality
-    console.log('Claiming escrow', escrowId);
+    console.log("Claiming escrow", escrowId);
 
     await sendTransaction({
       address: address as `0x${string}`,
-      functionName: 'withdraw',
+      functionName: "withdraw",
       args: [BigInt(escrowId)],
       abi,
     });
 
-    console.log('Transaction sent', hash);
+    console.log("Transaction sent", hash);
   };
 
-  const handleSend = async (amount: string, address: string, delaySec: number) => {
+  const handleSend = async (
+    amount: string,
+    address: string,
+    delaySec: number
+  ) => {
     // TODO: Implement actual send functionality
-    console.log('Sending', amount, 'ETH to', address, 'with delay', delaySec);
+    console.log("Sending", amount, "ETH to", address, "with delay", delaySec);
 
     await sendTransaction({
       address: address as `0x${string}`,
       value: BigInt(amount),
-      functionName: 'deposit',
+      functionName: "deposit",
       args: [address as `0x${string}`, BigInt(delaySec)],
       abi,
     });
 
-    console.log('Transaction sent', hash);
+    console.log("Transaction sent", hash);
   };
 
   // Calculate end times for pending transactions (30 minutes from now)
@@ -71,7 +80,6 @@ export default function AccountTransactions() {
   // });
 
   return (
-
     <div>
       <div className="mb-6 flex justify-between">
         <button
@@ -108,7 +116,7 @@ export default function AccountTransactions() {
           status="pending"
           amount="0.3 ETH"
           endTime={thirtyMinutesFromNow}
-          onAction={() => console.log('Cancel transaction')}
+          onAction={() => console.log("Cancel transaction")}
           date="2024-03-20 15:45"
         />
 
@@ -119,13 +127,13 @@ export default function AccountTransactions() {
           amount="0.8 ETH"
           date="2024-03-18 16:20"
         />
-      <SendDialog
-        isOpen={isSendDialogOpen}
-        onClose={() => setIsSendDialogOpen(false)}
-        onSend={handleSend}
-        maxAmount={accountBalance.data?.value.toString()}
-      />
+        <SendDialog
+          isOpen={isSendDialogOpen}
+          onClose={() => setIsSendDialogOpen(false)}
+          onSend={handleSend}
+          maxAmount={accountBalance.data?.value.toString()}
+        />
       </div>
-</div>
+    </div>
   );
 }

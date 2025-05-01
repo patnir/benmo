@@ -2,7 +2,6 @@ import { useAccount } from "wagmi";
 import { HowItWorks } from "./HowItWorks";
 import AccountSetup from "./AccountSetup";
 import AccountTransactions from "./AccountTransactions";
-import Address from "./Address";
 
 const App = () => {
   const account = useAccount();
@@ -15,9 +14,6 @@ const App = () => {
           Send transactions without worrying about sending to the wrong address.
         </p>
       </div>
-
-      {account.isConnected && <Address />}
-
       <HowItWorks />
 
       {!account.isConnected ? <AccountSetup /> : <AccountTransactions />}
