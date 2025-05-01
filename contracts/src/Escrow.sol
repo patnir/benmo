@@ -22,7 +22,6 @@ contract Escrow {
 
     uint256 public constant MIN_GAS_VALUE = 0.1 gwei;
 
-    
     uint256 public escrowCount;
 
     modifier onlySender(uint256 escrowId) {
@@ -55,7 +54,7 @@ contract Escrow {
 
         uint256 canWithdrawAt = block.timestamp + canWithdrawAfter;
         uint256 escrowId = escrowCount++;
-        
+
         escrows[escrowId] = EscrowData({
             sender: msg.sender,
             receiver: receiver,
@@ -71,9 +70,10 @@ contract Escrow {
         payable(receiver).transfer(MIN_GAS_VALUE);
     }
 
+    // the deposit wallet should be able to cancel the escrow before the receiver withdraws
     function cancel(uint256 escrowId) external escrowExists(escrowId) onlySender(escrowId) isPending(escrowId) {
-        require(block.timestamp >= escrows[escrowId].canWithdrawAt, "Cannot cancel before can withdraw at");
         escrows[escrowId].status = Status.Cancelled;
+        // refund the sender the amount
         payable(escrows[escrowId].sender).transfer(escrows[escrowId].amount);
     }
 
@@ -83,21 +83,13 @@ contract Escrow {
         payable(escrows[escrowId].receiver).transfer(escrows[escrowId].amount);
     }
 
-    function getEscrowDetails(uint256 escrowId) external view returns (
-        address sender,
-        address receiver,
-        uint256 amount,
-        Status status,
-        uint256 canWithdrawAt
-    ) {
+    function getEscrowDetails(uint256 escrowId)
+        external
+        view
+        returns (address sender, address receiver, uint256 amount, Status status, uint256 canWithdrawAt)
+    {
         require(escrowId < escrowCount, "Escrow does not exist");
         EscrowData memory escrow = escrows[escrowId];
-        return (
-            escrow.sender,
-            escrow.receiver,
-            escrow.amount,
-            escrow.status,
-            escrow.canWithdrawAt
-        );
+        return (escrow.sender, escrow.receiver, escrow.amount, escrow.status, escrow.canWithdrawAt);
     }
-} 
+}
