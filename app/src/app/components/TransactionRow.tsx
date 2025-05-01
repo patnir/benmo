@@ -12,7 +12,7 @@ type TransactionStatus = "pending" | "completed";
 interface TransactionRowProps {
   id: bigint;
   type: TransactionType;
-  status: TransactionStatus;
+  status: number;
   amount: string;
   date: string;
   endTime?: Date;
@@ -24,7 +24,7 @@ interface TransactionRowProps {
 export function TransactionRow({
   id,
   type,
-  status,
+  status: statusNumber,
   amount,
   date,
   endTime,
@@ -32,6 +32,11 @@ export function TransactionRow({
   onConfirm,
   onWithdraw,
 }: TransactionRowProps) {
+  console.log(statusNumber);
+
+  let status = statusNumber === 0 ? "pending" : statusNumber === 1 ? "completed" : "cancelled";
+  
+
   // Determine the icon and color based on transaction type
   const Icon = type === "send" ? ArrowUpIcon : ArrowDownIcon;
   const iconColor = type === "send" ? "text-blue-400" : "text-green-400";
@@ -62,6 +67,16 @@ export function TransactionRow({
                   <span>
                     <Timer endTime={endTime} /> remaining
                   </span>
+                </>
+              )}
+              {status === "cancelled" && (<>
+                <span>•</span>
+                <span>Cancelled</span>
+                </>
+              )}
+              {status === "completed" && (<>
+                <span>•</span>
+                <span>Completed</span>
                 </>
               )}
             </div>

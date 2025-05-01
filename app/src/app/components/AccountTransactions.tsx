@@ -131,7 +131,7 @@ export default function AccountTransactions() {
             onWithdraw={() => handleClaim(Number(transaction.id))}
             onCancel={() => handleCancel(Number(transaction.id))}
             // onConfirm={() => handle(Number(transaction.id))}
-            status="pending"
+            status={transaction.status}
             amount={`${(Number(transaction.amount) / 1e18).toFixed(6)} ETH`}
             date={"May 1, 2025"}
             endTime={new Date(Number(transaction.canWithdrawAt) * 1000)}
