@@ -1,5 +1,4 @@
 import { useAccount } from "wagmi";
-import { HowItWorks } from "./HowItWorks";
 import AccountSetup from "./AccountSetup";
 import AccountTransactions from "./AccountTransactions";
 import { Wallet } from "@coinbase/onchainkit/wallet";
@@ -22,7 +21,7 @@ const App = () => {
             address.
           </p>
         </div>
-        <HowItWorks />
+        {/* <HowItWorks /> */}
 
         {!account.isConnected ? <AccountSetup /> : <AccountTransactions />}
       </main>
